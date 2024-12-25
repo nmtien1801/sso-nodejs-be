@@ -88,23 +88,16 @@ const handleLogin = async (req, res) => {
   }
 };
 
-const handleLogout = async (req, res) => {
-  try {
-    // search: express delete cookie
-    res.clearCookie("jwt");
-    return res.status(200).json({
-      EM: "clear cookies - logout",
-      EC: 0,
-      DT: "",
-    });
-  } catch (error) {
-    console.log("check control login", req.body);
-    return res.status(500).json({
-      EM: "error from sever", //error message
-      EC: 2, //error code
-      DT: "", // data
-    });
-  }
+const handleLogout = (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return next(err);  // Nếu có lỗi khi xóa session, chuyển lỗi cho middleware tiếp theo
+    }
+    // Xóa cookie của session
+    res.clearCookie('connect.sid'); // Xóa cookie 'connect.sid' hoặc cookie bạn cấu hình
+    // Chuyển hướng người dùng về trang chủ (hoặc trang đăng nhập)
+    res.redirect('/');
+  });
 };
 
 const getRefreshToken = (req) => {

@@ -3,6 +3,7 @@ import authController from "../controller/authController";
 // import { checkUserJwt, checkUserPermission } from "../middleware/jwtAction";
 import passport from "passport";
 import LocalStrategy from "passport-local";
+import IsLogin from "../middleware/isLogin";
 
 const router = express.Router(); // bằng app = express();
 /**
@@ -15,29 +16,25 @@ const initAuthRoutes = (app) => {
   // middleware
   //   router.all("*", checkUserJwt, checkUserPermission);
 
-  // views
-  router.get("/loginPage", (req, res) => {
-    return res.render("login");
-  });
+  // ======================= views =========================
+  // router.get("/login", IsLogin, (req, res) => {
+  //   return res.render("login");
+  // });
 
-  router.get("/", (req, res) => {
-    return res.render("home");
-  });
+  // router.get("/", IsLogin, (req, res) => {
+  //   return res.render("home");
+  // });
 
-  //rest api - dùng web sử dụng các method (CRUD)
-  //GET(R), POST (C), PUT (U), DELETE (D)
-  router.post("/register", authController.handleRegister);
   router.post(
-    "/login",
-    // authController.handleLogin,
+    "/api/login",
     passport.authenticate("local", {
-      successRedirect: "/api/v1/",
-      failureRedirect: "/api/v1/loginPage",
+      successRedirect: "/",
+      failureRedirect: "/login",
     })
-  );
+  ); // -> sau đó dùng handleLogin ở (server)
   router.post("/logout", authController.handleLogout);
 
-  return app.use("/api/v1", router);
+  return app.use("", router);
 };
 
 export default initAuthRoutes;
