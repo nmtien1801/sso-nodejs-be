@@ -16,22 +16,23 @@ const initAuthRoutes = (app) => {
   // middleware
   //   router.all("*", checkUserJwt, checkUserPermission);
 
-  // ======================= views =========================
-  // router.get("/login", IsLogin, (req, res) => {
-  //   return res.render("login");
-  // });
+  // custom passport  -> sau đó dùng handleLogin ở (server)
+  router.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return res.status(500).json(err);
+      }
+      if (!user) {
+        return res.status(401).json(info.message);
+      }
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        // return res.redirect("/");
+        return res.status(200).json(user);
+      });
+    })(req, res, next);
+  });
 
-  // router.get("/", IsLogin, (req, res) => {
-  //   return res.render("home");
-  // });
-
-  router.post(
-    "/api/login",
-    passport.authenticate("local", {
-      successRedirect: "/",
-      failureRedirect: "/login",
-    })
-  ); // -> sau đó dùng handleLogin ở (server)
   router.post("/logout", authController.handleLogout);
 
   return app.use("", router);

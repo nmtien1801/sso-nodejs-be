@@ -2,6 +2,7 @@ import authService from "../service/authService";
 import { verifyToken } from "../middleware/jwtAction";
 import passport from "passport";
 import LocalStrategy from "passport-local";
+import flash from 'connect-flash';
 
 const handleRegister = async (req, res) => {
   try {
@@ -38,9 +39,11 @@ const handleRegister = async (req, res) => {
   }
 };
 
-const handleLogin = async (req, res) => {
+const handleLogin = async () => {
   try {
     passport.use(new LocalStrategy(
+      {
+      },
       async function(username, password, done) {
         let rawData ={
           username: username,
@@ -50,41 +53,13 @@ const handleLogin = async (req, res) => {
         if(data && +data.EC === 0){
           return done(null, data.DT);
         }else{
-          return done(null, false, {message: data.EM});
+          return done(null, false, { message: data.EM }); 
         }
-        // console.log("check control login : ", username, password);
-        // User.findOne({ username: username }, function (err, user) {
-        //   if (err) { return done(err); }
-        //   if (!user) { return done(null, false); }
-        //   if (!user.verifyPassword(password)) { return done(null, false); }
-        //   return done(null, user);
-        // });
       }
     ));
 
-    // let data = await authService.handleUserLogin(req.body);
-    // set cookie chứa refreshToken -> còn access_token lưu trong localStorage(FE)
-    // if (data && data.DT.access_token) {
-    //   res.cookie("sso", data.DT.access_token, {
-    //     httpOnly: true,
-    //     // secure: true,
-    //     maxAge: 60 * 60 * 1000,
-    //     sameSite: "strict", // ngăn chặn(CSOS) request từ các trang web khác
-    //   });
-    // }
-
-    // return res.status(200).json({
-    //   EM: data.EM,
-    //   EC: data.EC,
-    //   DT: data.DT,
-    // });
   } catch (error) {
     console.log("err control login: ", error);
-    // return res.status(500).json({
-    //   EM: "error from sever", //error message
-    //   EC: 2, //error code
-    //   DT: "", // data
-    // });
   }
 };
 

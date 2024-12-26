@@ -9,6 +9,8 @@ require("dotenv").config();
 import cookieParser from "cookie-parser";
 import {handleLogin} from "./controller/authController";
 import configSession from './config/session';
+import flash from 'connect-flash';
+
 const app = express();
 // config viewEngine
 configViewEngine(app);
@@ -35,6 +37,8 @@ app.use(cookieParser());
 
 //-----------------session : tạo table DB để lưu session (giống model)------------------
 configSession(app);
+app.use(flash()); // Sử dụng connect-flash để hiển thị message(EM)
+
 
 //-------------------------------------------------------------------------------------
 initAuthRoutes(app);
