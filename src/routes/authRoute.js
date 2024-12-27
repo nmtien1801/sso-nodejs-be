@@ -27,14 +27,15 @@ const initAuthRoutes = (app) => {
       }
       req.logIn(user, (err) => {
         if (err) return next(err);
-        // return res.redirect("/");
-        return res.status(200).json(user);
+        // return res.redirect(req.body.serviceURL);
+        return res.status(200).json({...user, redirectURL: req.body.serviceURL});
       });
     })(req, res, next);
   });
 
+  router.post("/api/register", authController.handleRegister);
   router.post("/logout", authController.handleLogout);
-
+  router.post("/api/verify-token", authController.check_ssoToken);
   return app.use("", router);
 };
 

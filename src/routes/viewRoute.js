@@ -18,15 +18,13 @@ const viewRoutes = (app) => {
 
   // ======================= views =========================
   router.get("/login", IsLogin, (req, res) => {
-    return res.render("login");
+    const serviceURL = req.query.serviceURL;
+    return res.render("login", {redirectURL: serviceURL});
   });
 
   router.get("/", IsLogin, (req, res) => {
     return res.render("home");
-  });
-
-  router.post("/register", authController.handleRegister);
-  
+  });  
 
   return app.use("", router);
 };

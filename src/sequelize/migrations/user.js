@@ -36,6 +36,9 @@ module.exports = {
       image:{
         type: Sequelize.BLOB("long"),
       },
+      refreshToken: {
+        type: Sequelize.STRING
+      },
       
       createdAt: {
         allowNull: false,

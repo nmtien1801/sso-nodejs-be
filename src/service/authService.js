@@ -5,6 +5,7 @@ import { raw } from "body-parser";
 import { Op } from "sequelize";
 import { createJwt, refreshToken } from "../middleware/jwtAction";
 import { reject, resolve } from "bluebird";
+import { v4 as uuidv4 } from "uuid";
 require("dotenv").config();
 // SEARCH: sequelize
 
@@ -54,7 +55,7 @@ const registerNewUser = async (rawUserData) => {
         DT: "email",
       };
     }
-   
+
     // hash user password
     let CheckHashPass = hashPassWord(formData.password);
     //create new user
@@ -68,7 +69,7 @@ const registerNewUser = async (rawUserData) => {
       groupID: 2, // mặc định là Guest
       roleID: "R2", // mặc định là bác sĩ
     });
-    
+
     // không bị lỗi
     return {
       EM: "A user is create successfully",
@@ -92,7 +93,7 @@ const handleUserLogin = async (rawData) => {
     // search: sequelize Op.or
     let user = await db.User.findOne({
       where: {
-        email: rawData.username
+        email: rawData.username,
       },
     });
     if (user) {
@@ -100,27 +101,18 @@ const handleUserLogin = async (rawData) => {
       // console.log("user: ", user);
       // không bị lỗi
       if (isCorrectPassword === true) {
+        const code = uuidv4();
+
         // let groupWithRole = await getGroupWithRoles(user);
-        // let payload = {
-        //   email: user.email,
-        //   userName: user.userName,
-        //   groupWithRole,
-        //   roleID: user.roleID, // chức vụ
-        //   positionID: user.positionID, // vị trí
-        // };
-        // let token = createJwt(payload);
-        // let tokenRefresh = refreshToken(payload);
         return {
           EM: "ok!",
           EC: 0,
           DT: {
-            _id: user.id, // dùng để lấy patient của doctor này
-            // access_token: token,
-            // refreshToken: tokenRefresh,
             // groupWithRole: groupWithRole,
             email: user.email,
             userName: user.userName,
             roleID: user.roleID, // chức vụ
+            code: code,
           },
         };
       }
@@ -140,10 +132,36 @@ const handleUserLogin = async (rawData) => {
   }
 };
 
+const updateUserRefreshToken = async (email, token) => {
+  try {
+    await db.User.update(
+      { refreshToken: token },
+      {
+        where: {
+          email: email,
+        },
+      }
+    );
+    return {
+      EM: "ok",
+      EC: 0,
+      DT: "",
+    };
+  } catch (error) {
+    console.log(">>>>check Err Login user: ", error);
+    return {
+      EM: "something wrong in service ...",
+      EC: -2,
+      DT: "",
+    };
+  }
+};
+
 module.exports = {
   registerNewUser,
   handleUserLogin,
   hashPassWord,
   checkEmailExists,
   checkPhoneExists,
+  updateUserRefreshToken,
 };

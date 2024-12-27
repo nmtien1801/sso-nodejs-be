@@ -46,6 +46,7 @@
   </head>
   <body>
     <div class="login-container">
+      <input type="hidden" value="<%=redirectURL%>" id="redirectURL"/>
       <h2 class="text-center mb-4">Login</h2>
 
       <!-- Login Form -->
@@ -103,6 +104,7 @@
         $("#btnLogin").on("click", function () {
           const username = $("#username").val();
           const password = $("#password").val();
+          const redirectURL = $("#redirectURL").val();
           $("#flashMsg").empty("")  // clear flash message -> không bị ghi đè nhiều lần mỗi lần error
 
           // dùng ajax để gửi dữ liệu lên server
@@ -112,11 +114,13 @@
             data: {
               username: username,
               password: password,
+              serviceURL: redirectURL,
             },
             withCredentials: true, // gửi cookie(session) lên server
             success: function (response) {
               $("#flashMsg").addClass("non-flash");
-              window.location.href = "/";
+              const redirectURL = `${response.redirectURL}/code?ssoToken=${response.code}`
+              window.location.href = redirectURL;
             },
             error: function (req, status, error) {
               $("#username").val("");

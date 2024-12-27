@@ -14,6 +14,7 @@ const configSession = (app) => {
       host: process.env.DB_HOST,
       dialect: process.env.DB_DIALECT, // hoặc 'mariadb', 'postgres', v.v.
       timezone: '+07:00', // Đặt múi giờ theo chuẩn ISO (+07:00 cho Việt Nam)
+      logging: false,  // Tắt log SQL
     },
   );
 
