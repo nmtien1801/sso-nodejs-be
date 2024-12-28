@@ -1,6 +1,6 @@
 import express from "express";
 import authController from "../controller/authController";
-// import { checkUserJwt, checkUserPermission } from "../middleware/jwtAction";
+import { checkUserJwt, checkUserPermission } from "../middleware/jwtAction";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import IsLogin from "../middleware/isLogin";
@@ -14,7 +14,7 @@ const router = express.Router(); // bằng app = express();
 
 const initAuthRoutes = (app) => {
   // middleware
-  //   router.all("*", checkUserJwt, checkUserPermission);
+    router.all("*", checkUserJwt, checkUserPermission);
 
   // custom passport  -> sau đó dùng handleLogin ở (server)
   router.post("/api/login", (req, res, next) => {
@@ -34,8 +34,10 @@ const initAuthRoutes = (app) => {
   });
 
   router.post("/api/register", authController.handleRegister);
-  router.post("/logout", authController.handleLogout);
+  router.post("/api/logout", authController.handleLogout);
   router.post("/api/verify-token", authController.check_ssoToken);
+  router.get("/api/account", authController.getUserAccount);
+
   return app.use("", router);
 };
 

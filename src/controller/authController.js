@@ -63,16 +63,34 @@ const handleLogin = async () => {
   }
 };
 
-const handleLogout = (req, res, next) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return next(err); // Nếu có lỗi khi xóa session, chuyển lỗi cho middleware tiếp theo
+// logout
+const handleLogout = async (req, res) => {
+  try {
+    let cookies = req.cookies;
+    if (cookies && cookies.access_Token) {
+      // clear cookie
+      res.clearCookie("access_Token");
+      res.clearCookie("refresh_Token");
+      return res.status(200).json({
+        EM: "ok",
+        EC: 0,
+        DT: "", // data
+      });
+    } else {
+      return res.status(401).json({
+        EM: "you are not authenticated", //error message
+        EC: 2, //error code
+        DT: "", // data
+      });
     }
-    // Xóa cookie của session
-    res.clearCookie("connect.sid"); // Xóa cookie 'connect.sid' hoặc cookie bạn cấu hình
-    // Chuyển hướng người dùng về trang chủ (hoặc trang đăng nhập)
-    res.redirect("/");
-  });
+  } catch (error) {
+    console.log("err control logout: ", error);
+    return res.status(500).json({
+      EM: "error from sever", //error message
+      EC: -1, //error code
+      DT: "", // data
+    });
+  }
 };
 
 const getRefreshToken = (req) => {
@@ -136,7 +154,7 @@ const check_ssoToken = async (req, res, next) => {
           if (err) return reject(err);
           res.clearCookie("connect.sid", {
             httpOnly: true,
-            secure: false, 
+            secure: false,
           });
           resolve();
         });
@@ -164,9 +182,35 @@ const check_ssoToken = async (req, res, next) => {
   }
 };
 
+const getUserAccount = async (req, res) => {
+  setTimeout(() => {
+    try {
+      // req lấy từ context
+      return res.status(200).json({
+        EM: "ok fetch context",
+        EC: 0,
+        DT: {
+          access_Token: req.access_Token,
+          refresh_Token: req.refresh_Token,
+          // groupWithRole: req.user.groupWithRole,
+          email: req.user.email,
+          userName: req.user.userName,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        EM: "error from sever", //error message
+        EC: 2, //error code
+        DT: "", // data
+      });
+    }
+  }, 1000);
+};
+
 module.exports = {
   handleRegister,
   handleLogin,
   handleLogout,
   check_ssoToken,
+  getUserAccount,
 };

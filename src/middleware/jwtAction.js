@@ -25,7 +25,7 @@ const verifyToken = (token) => {
   return decoded;
 };
 
-const nonSecurePaths = ["/logout", "/register", "/login"]; // kh check middleware url (1)
+const nonSecurePaths = ["/api/logout", "/api/register", "/login", "/api/login", "/api/verify-token"]; // kh check middleware url (1)
 
 // token từ BE sẽ lưu vào header bên FE
 const extractToken = (req) => {
@@ -44,63 +44,64 @@ const checkUserJwt = (req, res, next) => {
   let cookies = req.cookies;
   let tokenFromHeader = extractToken(req);
 
-  if ((cookies && cookies.jwt) || tokenFromHeader) {
+  if ((cookies && cookies.access_Token) || tokenFromHeader) {
     // bug vừa vào đã check quyền xác thực khi chưa login của Context
-    let token = cookies && cookies.jwt ? cookies.jwt : tokenFromHeader;
-    let decoded = verifyToken(token);
+    let access_Token = cookies && cookies.access_Token ? cookies.access_Token : tokenFromHeader;
+    let decoded = verifyToken(access_Token);
     if (decoded) {
       req.user = decoded; // gán thêm .user(data cookie) vào req BE nhận từ FE
-      req.token = token; // gán thêm .token(data cookie) vào req BE nhận từ FE
+      req.access_Token = access_Token; // gán thêm .token(data cookie) vào req BE nhận từ FE
+      req.refresh_Token = cookies.refresh_Token; // gán thêm .token(data cookie) vào req BE nhận từ FE
       next();
     } else {
       return res.status(401).json({
         EC: -1,
         DT: "",
-        EM: "Not authenticated the user(token jwt)",
+        EM: "Not authenticated the user(token access_Token)",
       });
     }
-    // console.log(">>> my cookies 401: ", cookies.jwt);
+    // console.log(">>> my cookies 401: ", cookies.access_Token);
   }
   // ngược lại khi không có cookies or header thì trả ra lỗi không xác thực
   else {
     return res.status(401).json({
       EC: -1,
       DT: "",
-      EM: "Not authenticated the user(jwt | JWT)",
+      EM: "Not authenticated the user(access_Token | JWT)",
     });
   }
 };
 
 //middleware check user có quyền không(lấy role -> ss URL)
 const checkUserPermission = (req, res, next) => {
-  if (nonSecurePaths.includes(req.path) || req.path === "/account")
+  if (nonSecurePaths.includes(req.path) || req.path === "/api/account")
     return next(); // kh check middleware url (2)
   if (req.user) {
     let email = req.user.email; // (chắc chắn hơn)-> dùng query xuống db để xem quyền -> ss roles lấy từ token
-    let roles = req.user.groupWithRole.Roles;
+    // let roles = req.user.groupWithRole.Roles;
     let currentUrl = req.path;
-    if (!roles && roles.length === 0) {
-      return res.status(401).json({
-        EC: -1,
-        DT: "",
-        EM: `you don't permission to access this resource`,
-      });
-    }
+    // if (!roles && roles.length === 0) {
+    //   return res.status(401).json({
+    //     EC: -1,
+    //     DT: "",
+    //     EM: `you don't permission to access this resource`,
+    //   });
+    // }
     // vòng lặp some từng phần tử ss token vs path(router)
     // bug role/:id từ req là động -> thêm include  /:id
-    let canAccess = roles.some(
-      (item) => item.url === currentUrl || currentUrl.includes(item.url)
-    );
-    if (canAccess) {
-      next();
-    } else {
-      console.log(">>>>check canAccess: ", canAccess);
-      return res.status(401).json({
-        EC: -1,
-        DT: "",
-        EM: `you don't permission to access this resource`,
-      });
-    }
+    // let canAccess = roles.some(
+    //   (item) => item.url === currentUrl || currentUrl.includes(item.url)
+    // );
+    // if (canAccess) {
+      // next();
+    // } else {
+    //   console.log(">>>>check canAccess: ", canAccess);
+    //   return res.status(401).json({
+    //     EC: -1,
+    //     DT: "",
+    //     EM: `you don't permission to access this resource`,
+    //   });
+    // }
   } else {
     return res.status(401).json({
       EC: -1,
@@ -111,23 +112,23 @@ const checkUserPermission = (req, res, next) => {
 };
 
 // tạo mới khi token hết hạn
-const refreshToken = (payload) => {
-  let key = process.env.JWT_REFRESH_TOKEN;
-  let token = null;
-  try {
-    token = jwt.sign(payload, key, {
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_TOKEN,
-    }); // fix lỗi thời gian lưu token # cookies
-  } catch (error) {
-    console.log(">>>>>check err token: ", error);
-  }
-  return token;
-};
+// const refreshToken = (payload) => {
+//   let key = process.env.JWT_REFRESH_TOKEN;
+//   let token = null;
+//   try {
+//     token = jwt.sign(payload, key, {
+//       expiresIn: process.env.JWT_REFRESH_EXPIRES_TOKEN,
+//     }); // fix lỗi thời gian lưu token # cookies
+//   } catch (error) {
+//     console.log(">>>>>check err token: ", error);
+//   }
+//   return token;
+// };
 
 module.exports = {
   createJwt,
   verifyToken,
   checkUserJwt,
   checkUserPermission,
-  refreshToken,
+  // refreshToken,
 };
