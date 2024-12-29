@@ -7,7 +7,7 @@ import bodyParser from "body-parser"; // lấy params, query /user?id=7
 require("dotenv").config();
 // import connection from "./config/connectDB";
 import cookieParser from "cookie-parser";
-import {handleLogin} from "./controller/authController";
+import {handleLogin, handleLoginWithGoogle} from "./controller/authController";
 import configSession from './config/session';
 import flash from 'connect-flash';
 
@@ -54,6 +54,7 @@ app.use((req, res) => {
 
 // ----------------------------- dùng passport sso ---------------------------
 handleLogin();
+handleLoginWithGoogle();
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    <form action="/logout" method="POST">
-        <button type="submit">Logout</button>
+  </head>
+  <body>
+    <!-- 
+        local login: truyền được username và password qua form -> FE
+        social login: thông tin lấy từ media -> không truyền được urlFE(vì mặc định media trả về) nên lưu = localStogare
+    -->
+    <form action="/api/logout" method="POST">
+      <button type="submit">Logout</button>
     </form>
-</body>
+  </body>
 </html>

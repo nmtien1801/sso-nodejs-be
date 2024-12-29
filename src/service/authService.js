@@ -157,6 +157,51 @@ const updateUserRefreshToken = async (email, token) => {
   }
 };
 
+const upsertUserSocialMedia = async (typeAccount, rawData) => {
+  try {
+    if (typeAccount === "google") {
+      let user = await db.User.findOne({
+        where: {
+          email: rawData.email,
+          type: typeAccount,
+        },
+        raw: true,
+      });
+
+      if (!user) {
+        // create new user
+        user = await db.User.create({
+          userName: rawData.userName,
+          email: rawData.email,
+          type: typeAccount,
+        });
+        user = user.get({ plain: true }); // Chuyển đối tượng Sequelize thành JSON -> giống raw: true
+      } 
+
+      const code = uuidv4();
+
+      return {
+        EM: "ok",
+        EC: 0,
+        DT: {
+          userName: user.userName,
+          email: user.email,
+          googleId: rawData.googleId,
+          type: typeAccount,
+          code: code,
+        },
+      };
+    }
+  } catch (error) {
+    console.log(">>>>check Err Login user: ", error);
+    return {
+      EM: "something wrong in service ...",
+      EC: -2,
+      DT: "",
+    };
+  }
+};
+
 module.exports = {
   registerNewUser,
   handleUserLogin,
@@ -164,4 +209,5 @@ module.exports = {
   checkEmailExists,
   checkPhoneExists,
   updateUserRefreshToken,
+  upsertUserSocialMedia,
 };

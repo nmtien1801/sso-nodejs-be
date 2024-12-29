@@ -25,7 +25,17 @@ const verifyToken = (token) => {
   return decoded;
 };
 
-const nonSecurePaths = ["/api/logout", "/api/register", "/login", "/api/login", "/api/verify-token"]; // kh check middleware url (1)
+const nonSecurePaths = [
+  "/",
+  "/social",
+  "/api/logout",
+  "/api/register",
+  "/login",
+  "/api/login",
+  "/api/verify-token",
+  "/auth/google",
+  "/auth/google/redirect",
+]; // kh check middleware url (1)
 
 // token từ BE sẽ lưu vào header bên FE
 const extractToken = (req) => {
@@ -46,7 +56,8 @@ const checkUserJwt = (req, res, next) => {
 
   if ((cookies && cookies.access_Token) || tokenFromHeader) {
     // bug vừa vào đã check quyền xác thực khi chưa login của Context
-    let access_Token = cookies && cookies.access_Token ? cookies.access_Token : tokenFromHeader;
+    let access_Token =
+      cookies && cookies.access_Token ? cookies.access_Token : tokenFromHeader;
     let decoded = verifyToken(access_Token);
     if (decoded) {
       req.user = decoded; // gán thêm .user(data cookie) vào req BE nhận từ FE
@@ -93,7 +104,7 @@ const checkUserPermission = (req, res, next) => {
     //   (item) => item.url === currentUrl || currentUrl.includes(item.url)
     // );
     // if (canAccess) {
-      // next();
+    // next();
     // } else {
     //   console.log(">>>>check canAccess: ", canAccess);
     //   return res.status(401).json({

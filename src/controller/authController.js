@@ -6,6 +6,7 @@ import flash from "connect-flash";
 import { v4 as uuidv4 } from "uuid";
 import { createJwt, refreshToken } from "../middleware/jwtAction";
 import "dotenv/config";
+var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 const handleRegister = async (req, res) => {
   try {
@@ -42,6 +43,7 @@ const handleRegister = async (req, res) => {
   }
 };
 
+// config passport local
 const handleLogin = async () => {
   try {
     passport.use(
@@ -67,6 +69,21 @@ const handleLogin = async () => {
 const handleLogout = async (req, res) => {
   try {
     let cookies = req.cookies;
+    // xóa tại page home.ejs BE
+    if (cookies && cookies["connect.sid"]) {
+      req.session.destroy((err) => {
+        if (err)
+          return res.status(500).json({
+            EM: "Failed to destroy session",
+            EC: -1,
+          });
+      });
+      res.clearCookie("connect.sid");
+
+      return res.redirect("/login"); // Chuyển hướng đến trang đăng nhập BE
+    }
+
+    // xóa tại page FE
     if (cookies && cookies.access_Token) {
       // clear cookie
       res.clearCookie("access_Token");
@@ -90,20 +107,6 @@ const handleLogout = async (req, res) => {
       EC: -1, //error code
       DT: "", // data
     });
-  }
-};
-
-const getRefreshToken = (req) => {
-  let cookies = req.cookies;
-  if (cookies && cookies.refreshToken) {
-    return cookies.refreshToken;
-  } else {
-    return res.status(401).json({
-      EM: "you are not authenticated", //error message
-      EC: 2, //error code
-      DT: "", // data
-    });
-    verifyToken(cookies.refreshToken);
   }
 };
 
@@ -207,10 +210,53 @@ const getUserAccount = async (req, res) => {
   }, 1000);
 };
 
+// config passport google auth2
+const handleLoginWithGoogle = () => {
+  try {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_APP_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_APP_CLIENT_SECRET,
+          callbackURL: process.env.GOOGLE_APP_REDIRECT_LOGIN,
+        },
+        async function (accessToken, refreshToken, profile, done) {
+          const typeAccount = "google";
+
+          // thông tin khi login google
+          let rawData = {
+            userName: profile.displayName,
+            email:
+              profile.emails && profile.emails.length > 0
+                ? profile.emails[0].value
+                : "",
+            googleId: profile.id,
+          };
+
+          // check user DB(create + update)
+          let data = await authService.upsertUserSocialMedia(
+            typeAccount,
+            rawData
+          );
+
+          if (data && +data.EC === 0) {
+            return done(null, data.DT);
+          } else {
+            return done(null, false, { message: data.EM });
+          }
+        }
+      )
+    );
+  } catch (error) {
+    console.log("err control login: ", error);
+  }
+};
+
 module.exports = {
   handleRegister,
   handleLogin,
   handleLogout,
   check_ssoToken,
   getUserAccount,
+  handleLoginWithGoogle,
 };

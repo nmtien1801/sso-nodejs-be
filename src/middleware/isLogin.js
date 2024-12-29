@@ -1,3 +1,4 @@
+// check login bên BE (còn FE dùng access_Token check)
 const IsLogin = (req, res, next) => {
     if (req.isAuthenticated()) {
         if (req.path === '/login') {

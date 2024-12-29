@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
       groupID: DataTypes.INTEGER,
       image: DataTypes.STRING, // add column -> dùng string để hứng blob đã lưu trong db
       roleID: DataTypes.STRING,
+      type:{
+        type: DataTypes.STRING,
+        defaultValue: "local",  // google, local, facebook
+      },
       refreshToken: DataTypes.STRING,
     },
     {

@@ -36,6 +36,9 @@ module.exports = {
       image:{
         type: Sequelize.BLOB("long"),
       },
+      type:{
+        type: Sequelize.STRING,
+      },
       refreshToken: {
         type: Sequelize.STRING
       },

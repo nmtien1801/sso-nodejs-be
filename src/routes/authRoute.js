@@ -14,9 +14,9 @@ const router = express.Router(); // bằng app = express();
 
 const initAuthRoutes = (app) => {
   // middleware
-    router.all("*", checkUserJwt, checkUserPermission);
+  router.all("*", checkUserJwt, checkUserPermission);
 
-  // custom passport  -> sau đó dùng handleLogin ở (server)
+  // custom passport  -> sau đó dùng authController.handleLogin ở (server.js)
   router.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) {
@@ -28,10 +28,37 @@ const initAuthRoutes = (app) => {
       req.logIn(user, (err) => {
         if (err) return next(err);
         // return res.redirect(req.body.serviceURL);
-        return res.status(200).json({...user, redirectURL: req.body.serviceURL});
+        return res
+          .status(200)
+          .json({ ...user, redirectURL: req.body.serviceURL });
       });
     })(req, res, next);
   });
+
+  // custom passport google -> sau đó dùng authController.handleLoginWithGoogle ở (server.js)
+  router.get(
+    "/auth/google",
+    (req, res, next) => {
+      const redirectUrl = req.query.redirectUrl;
+      const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
+      passport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: state, // Gắn URL vào state
+      })(req, res, next);
+    }
+  );
+
+  router.get(
+    "/auth/google/redirect",
+    passport.authenticate("google", {
+      failureRedirect: "/login",
+    }),
+    (req, res) => {
+      console.log("req.user", req.user);
+      const redirectUrl = decodeURIComponent(req.query.state);
+      res.redirect(redirectUrl + `/code?ssoToken=${req.user.code}`);
+    }
+  );
 
   router.post("/api/register", authController.handleRegister);
   router.post("/api/logout", authController.handleLogout);
