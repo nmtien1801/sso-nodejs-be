@@ -98,12 +98,8 @@
         <button class="btn btn-danger btn-google" type="button">
           <i class="fab fa-google" id="iconGoogle"></i>
         </button>
-        <button
-          class="btn btn-primary btn-facebook"
-          id="iconFacebook"
-          onclick="window.location.href='/auth/facebook'"
-        >
-          <i class="fab fa-facebook"></i>
+        <button class="btn btn-primary btn-facebook" type="button">
+          <i class="fab fa-facebook" id="iconFacebook"></i>
         </button>
       </div>
 
@@ -150,8 +146,16 @@
         $("#iconGoogle").on("click", function () {
           const redirectURL = $("#redirectURL").val();
           console.log("redirectURL", redirectURL);
-          
+
           window.location.href = `/auth/google?redirectUrl=${redirectURL}`;
+        });
+
+        // login with facebook
+        $("#iconFacebook").on("click", function () {
+          const redirectURL = $("#redirectURL").val();
+          console.log("redirectURL", redirectURL);
+
+          window.location.href = `/auth/facebook?redirectUrl=${redirectURL}`;
         });
       });
     </script>

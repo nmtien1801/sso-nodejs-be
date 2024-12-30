@@ -27,7 +27,6 @@ const verifyToken = (token) => {
 
 const nonSecurePaths = [
   "/",
-  "/social",
   "/api/logout",
   "/api/register",
   "/login",
@@ -35,6 +34,8 @@ const nonSecurePaths = [
   "/api/verify-token",
   "/auth/google",
   "/auth/google/redirect",
+  "/auth/facebook",
+  "/auth/facebook/redirect",
 ]; // kh check middleware url (1)
 
 // token từ BE sẽ lưu vào header bên FE
@@ -53,6 +54,7 @@ const checkUserJwt = (req, res, next) => {
   if (nonSecurePaths.includes(req.path)) return next(); // kh check middleware url (2)
   let cookies = req.cookies;
   let tokenFromHeader = extractToken(req);
+  console.log("req: ", cookies);
 
   if ((cookies && cookies.access_Token) || tokenFromHeader) {
     // bug vừa vào đã check quyền xác thực khi chưa login của Context
@@ -122,24 +124,9 @@ const checkUserPermission = (req, res, next) => {
   }
 };
 
-// tạo mới khi token hết hạn
-// const refreshToken = (payload) => {
-//   let key = process.env.JWT_REFRESH_TOKEN;
-//   let token = null;
-//   try {
-//     token = jwt.sign(payload, key, {
-//       expiresIn: process.env.JWT_REFRESH_EXPIRES_TOKEN,
-//     }); // fix lỗi thời gian lưu token # cookies
-//   } catch (error) {
-//     console.log(">>>>>check err token: ", error);
-//   }
-//   return token;
-// };
-
 module.exports = {
   createJwt,
   verifyToken,
   checkUserJwt,
   checkUserPermission,
-  // refreshToken,
 };

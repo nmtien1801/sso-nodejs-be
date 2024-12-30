@@ -36,17 +36,15 @@ const initAuthRoutes = (app) => {
   });
 
   // custom passport google -> sau đó dùng authController.handleLoginWithGoogle ở (server.js)
-  router.get(
-    "/auth/google",
-    (req, res, next) => {
-      const redirectUrl = req.query.redirectUrl;
-      const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
-      passport.authenticate("google", {
-        scope: ["profile", "email"],
-        state: state, // Gắn URL vào state
-      })(req, res, next);
-    }
-  );
+  router.get("/auth/google", (req, res, next) => {
+    const redirectUrl = req.query.redirectUrl;
+    const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
+    
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state: state, // Gắn URL vào state
+    })(req, res, next);
+  });
 
   router.get(
     "/auth/google/redirect",
@@ -54,7 +52,28 @@ const initAuthRoutes = (app) => {
       failureRedirect: "/login",
     }),
     (req, res) => {
-      console.log("req.user", req.user);
+      const redirectUrl = decodeURIComponent(req.query.state);
+      res.redirect(redirectUrl + `/code?ssoToken=${req.user.code}`);
+    }
+  );
+
+  // custom passport facebook -> sau đó dùng authController.handleLoginWithFacebook ở (server.js)
+  router.get("/auth/facebook", (req, res, next) => {
+    const redirectUrl = req.query.redirectUrl;
+    const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
+    
+    passport.authenticate("facebook", {
+      scope: ["public_profile", "email"],
+      state: state, // Gắn URL vào state
+    })(req, res, next);
+  });
+
+  router.get(
+    "/auth/facebook/redirect",
+    passport.authenticate("facebook", {
+      failureRedirect: "/login",
+    }),
+    (req, res) => {
       const redirectUrl = decodeURIComponent(req.query.state);
       res.redirect(redirectUrl + `/code?ssoToken=${req.user.code}`);
     }

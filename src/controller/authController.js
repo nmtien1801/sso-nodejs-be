@@ -1,5 +1,4 @@
 import authService from "../service/authService";
-import { verifyToken } from "../middleware/jwtAction";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import flash from "connect-flash";
@@ -7,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createJwt, refreshToken } from "../middleware/jwtAction";
 import "dotenv/config";
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 
 const handleRegister = async (req, res) => {
   try {
@@ -229,7 +229,7 @@ const handleLoginWithGoogle = () => {
             email:
               profile.emails && profile.emails.length > 0
                 ? profile.emails[0].value
-                : "",
+                : profile.id,
             googleId: profile.id,
           };
 
@@ -252,6 +252,49 @@ const handleLoginWithGoogle = () => {
   }
 };
 
+// config passport facebook
+const handleLoginWithFacebook = () => {
+  try {
+    passport.use(
+      new FacebookStrategy(
+        {
+          clientID: process.env.FB_APP_CLIENT_ID,
+          clientSecret: process.env.FB_APP_CLIENT_SECRET,
+          callbackURL: process.env.FB_APP_REDIRECT_LOGIN,
+          profileFields: ["id", "emails", "displayName"], // Đảm bảo bạn yêu cầu đúng trường
+        },
+        async function (accessToken, refreshToken, profile, done) {
+          const typeAccount = "facebook";
+
+          // thông tin khi login facebook 
+          let rawData = {
+            userName: profile.displayName,
+            email:
+              profile.emails && profile.emails.length > 0
+                ? profile.emails[0].value
+                : profile.id,
+            facebookId: profile.id,
+          };
+
+          // check user DB(create + update)
+          let data = await authService.upsertUserSocialMedia(
+            typeAccount,
+            rawData
+          );
+          
+          if (data && +data.EC === 0) {
+            return done(null, data.DT);
+          } else {
+            return done(null, false, { message: data.EM});
+          }
+        }
+      )
+    );
+  } catch (error) {
+    console.log("err control login: ", error);
+  }
+};
+
 module.exports = {
   handleRegister,
   handleLogin,
@@ -259,4 +302,5 @@ module.exports = {
   check_ssoToken,
   getUserAccount,
   handleLoginWithGoogle,
+  handleLoginWithFacebook
 };

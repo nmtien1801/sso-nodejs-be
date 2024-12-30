@@ -159,7 +159,6 @@ const updateUserRefreshToken = async (email, token) => {
 
 const upsertUserSocialMedia = async (typeAccount, rawData) => {
   try {
-    if (typeAccount === "google") {
       let user = await db.User.findOne({
         where: {
           email: rawData.email,
@@ -191,7 +190,6 @@ const upsertUserSocialMedia = async (typeAccount, rawData) => {
           code: code,
         },
       };
-    }
   } catch (error) {
     console.log(">>>>check Err Login user: ", error);
     return {
