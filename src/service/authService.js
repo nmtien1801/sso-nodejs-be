@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { raw } from "body-parser";
 // import { getGroupWithRoles } from "./jwtService";
 import { Op } from "sequelize";
-import { createJwt, refreshToken } from "../middleware/jwtAction";
+import { createJwt } from "../middleware/jwtAction";
 import { reject, resolve } from "bluebird";
 import { v4 as uuidv4 } from "uuid";
 require("dotenv").config();
@@ -159,37 +159,37 @@ const updateUserRefreshToken = async (email, token) => {
 
 const upsertUserSocialMedia = async (typeAccount, rawData) => {
   try {
-      let user = await db.User.findOne({
-        where: {
-          email: rawData.email,
-          type: typeAccount,
-        },
-        raw: true,
+    let user = await db.User.findOne({
+      where: {
+        email: rawData.email,
+        type: typeAccount,
+      },
+      raw: true,
+    });
+
+    if (!user) {
+      // create new user
+      user = await db.User.create({
+        userName: rawData.userName,
+        email: rawData.email,
+        type: typeAccount,
       });
+      user = user.get({ plain: true }); // Chuyển đối tượng Sequelize thành JSON -> giống raw: true
+    }
 
-      if (!user) {
-        // create new user
-        user = await db.User.create({
-          userName: rawData.userName,
-          email: rawData.email,
-          type: typeAccount,
-        });
-        user = user.get({ plain: true }); // Chuyển đối tượng Sequelize thành JSON -> giống raw: true
-      } 
+    const code = uuidv4();
 
-      const code = uuidv4();
-
-      return {
-        EM: "ok",
-        EC: 0,
-        DT: {
-          userName: user.userName,
-          email: user.email,
-          googleId: rawData.googleId,
-          type: typeAccount,
-          code: code,
-        },
-      };
+    return {
+      EM: "ok",
+      EC: 0,
+      DT: {
+        userName: user.userName,
+        email: user.email,
+        googleId: rawData.googleId,
+        type: typeAccount,
+        code: code,
+      },
+    };
   } catch (error) {
     console.log(">>>>check Err Login user: ", error);
     return {
@@ -200,7 +200,29 @@ const upsertUserSocialMedia = async (typeAccount, rawData) => {
   }
 };
 
-module.exports = {
+const getUserByRefreshToken = async (refreshToken) => {
+  try {
+    let user = await db.User.findOne({
+      where: {
+        refreshToken: refreshToken,
+      },
+    });
+    if (user) {
+      return {
+        email: user.email,
+        userName: user.userName,
+        // groupWithRole: user.groupWithRole,
+        roleID: user.roleID, // chức vụ
+      };
+    }
+    return null;
+  } catch (error) {
+    console.log(">>>>check Err Login user: ", error);
+    return null;
+  }
+};
+
+export default {
   registerNewUser,
   handleUserLogin,
   hashPassWord,
@@ -208,4 +230,5 @@ module.exports = {
   checkPhoneExists,
   updateUserRefreshToken,
   upsertUserSocialMedia,
+  getUserByRefreshToken,
 };
