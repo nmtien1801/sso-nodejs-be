@@ -41,6 +41,9 @@ const nonSecurePaths = [
   "/auth/google/redirect",
   "/auth/facebook",
   "/auth/facebook/redirect",
+  "/forgot-password-page",
+  "/api/send-code",
+  "/api/reset-password",
 ]; // kh check middleware url (1)
 
 // token từ BE sẽ lưu vào header bên FE
@@ -59,7 +62,7 @@ const checkUserJwt = async (req, res, next) => {
   if (nonSecurePaths.includes(req.path)) return next(); // kh check middleware url (2)
   let cookies = req.cookies;
   let tokenFromHeader = extractToken(req);
-  
+
   if ((cookies && cookies.access_Token) || tokenFromHeader) {
     // bug vừa vào đã check quyền xác thực khi chưa login của Context
     let access_Token =
@@ -96,8 +99,7 @@ const checkUserJwt = async (req, res, next) => {
           DT: "",
           EM: "need to retry with new token",
         });
-      }
-      else{
+      } else {
         return res.status(401).json({
           EC: -1,
           DT: "",

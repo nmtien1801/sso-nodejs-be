@@ -93,8 +93,12 @@
         Login
       </button>
 
+      <div class="mt-3">
+        <a href="/forgot-password-page">Forgot your password ?</a>
+      </div>
+
       <!-- Social Login Buttons -->
-      <div class="d-flex gap-3 mt-5 justify-content-center">
+      <div class="d-flex gap-3 mt-4 justify-content-center">
         <button class="btn btn-danger btn-google" type="button">
           <i class="fab fa-google" id="iconGoogle"></i>
         </button>
@@ -105,7 +109,7 @@
 
       <!-- Register Link -->
       <div class="text-center mt-3">
-        <p>Don't have an account? <a href="/register">Register here</a></p>
+        <p>Don't have an account? <a href="http://localhost:3000/register">Register here</a></p>
       </div>
     </div>
 
@@ -157,6 +161,13 @@
 
           window.location.href = `/auth/facebook?redirectUrl=${redirectURL}`;
         });
+      });
+
+      // đăng nhập khi nhấn phím Enter
+      $("#password").on("keydown", function (e) {
+        if (e.key === "Enter") {
+          $("#btnLogin").click(); // giả lập nhấn nút Login
+        }
       });
     </script>
   </body>

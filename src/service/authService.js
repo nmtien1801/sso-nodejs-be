@@ -222,6 +222,99 @@ const getUserByRefreshToken = async (refreshToken) => {
   }
 };
 
+const updateCode = async (email, code) => {
+  try {
+    await db.User.update(
+      { code: code },
+      {
+        where: {
+          email: email,
+        },
+      }
+    );
+    return {
+      EM: "ok",
+      EC: 0,
+      DT: "",
+    };
+  } catch (error) {
+    console.log(">>>>check Err update code send email: ", error);
+    return {
+      EM: "something wrong in service ...",
+      EC: -2,
+      DT: "",
+    };
+  }
+};
+
+const checkEmailLocal = async (email) => {
+  try {
+    let user = await db.User.findOne({
+      where: {
+        email: email,
+        type: "local",
+      },
+    });
+    if (user) {
+      return {
+        EM: "ok",
+        EC: 0,
+        DT: user,
+      };
+    }
+    return {
+      EM: `Email ${email} is not exist in system`,
+      EC: 1,
+      DT: "",
+    };
+  } catch (error) {
+    console.log(">>>>check Err check email: ", error);
+    return {
+      EM: "something wrong in service ...",
+      EC: -2,
+      DT: "",
+    };
+  }
+};
+
+const updatePassword = async (email, password, code) => {
+  try {
+    let user = await db.User.findOne({
+      where: {
+        email: email,
+        code: code,
+      },
+    });
+    if (user) {
+      // update password
+      await db.User.update(
+        { passWord: hashPassWord(password) },
+        {
+          where: {
+            email: email,
+          },
+        }
+      );
+      return {
+        EM: "ok",
+        EC: 0,
+        DT: user,
+      };
+    }
+    return {
+      EM: `Code ${code} is incorrect`,
+      EC: 1,
+      DT: "",
+    };
+  } catch (error) {
+    console.log(">>>>check Err check code: ", error);
+    return {
+      EM: "something wrong in service ...",
+      EC: -2,
+      DT: "",
+    };
+  }
+};
 export default {
   registerNewUser,
   handleUserLogin,
@@ -231,4 +324,7 @@ export default {
   updateUserRefreshToken,
   upsertUserSocialMedia,
   getUserByRefreshToken,
+  updateCode,
+  checkEmailLocal,
+  updatePassword,
 };

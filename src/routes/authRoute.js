@@ -39,7 +39,7 @@ const initAuthRoutes = (app) => {
   router.get("/auth/google", (req, res, next) => {
     const redirectUrl = req.query.redirectUrl;
     const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
-    
+
     passport.authenticate("google", {
       scope: ["profile", "email"],
       state: state, // Gắn URL vào state
@@ -61,7 +61,7 @@ const initAuthRoutes = (app) => {
   router.get("/auth/facebook", (req, res, next) => {
     const redirectUrl = req.query.redirectUrl;
     const state = encodeURIComponent(redirectUrl); // Mã hóa URL để truyền trong state -> state nhận req khi bấm login
-    
+
     passport.authenticate("facebook", {
       scope: ["public_profile", "email"],
       state: state, // Gắn URL vào state
@@ -84,6 +84,9 @@ const initAuthRoutes = (app) => {
   router.post("/api/verify-token", authController.check_ssoToken);
   router.get("/api/account", authController.getUserAccount);
 
+  app.post("/api/send-code", authController.sendCode);
+  app.post("/api/reset-password", authController.resetPassword);
+  
   return app.use("", router);
 };
 

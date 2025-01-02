@@ -4,6 +4,7 @@ import authController from "../controller/authController";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import IsLogin from "../middleware/isLogin";
+require("dotenv").config();
 
 const router = express.Router(); // bằng app = express();
 /**
@@ -26,6 +27,11 @@ const viewRoutes = (app) => {
     return res.render("home");
   });  
 
+  router.get("/forgot-password-page", (req, res) => {
+    let backUrlLogin = process.env.URL_LOGIN;
+    return res.render("forgot-password", {backUrlLogin});
+  });  
+  
   return app.use("", router);
 };
 

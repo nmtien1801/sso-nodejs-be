@@ -42,6 +42,9 @@ module.exports = {
       refreshToken: {
         type: Sequelize.STRING
       },
+      code: {
+        type: Sequelize.STRING
+      },
       
       createdAt: {
         allowNull: false,

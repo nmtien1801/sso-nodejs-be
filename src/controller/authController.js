@@ -7,6 +7,7 @@ import { createJwt, refreshToken } from "../middleware/jwtAction";
 import "dotenv/config";
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
+import emailService from "../service/emailService";
 
 const handleRegister = async (req, res) => {
   try {
@@ -266,7 +267,7 @@ const handleLoginWithFacebook = () => {
         async function (accessToken, refreshToken, profile, done) {
           const typeAccount = "facebook";
 
-          // thông tin khi login facebook 
+          // thông tin khi login facebook
           let rawData = {
             userName: profile.displayName,
             email:
@@ -281,17 +282,80 @@ const handleLoginWithFacebook = () => {
             typeAccount,
             rawData
           );
-          
+
           if (data && +data.EC === 0) {
             return done(null, data.DT);
           } else {
-            return done(null, false, { message: data.EM});
+            return done(null, false, { message: data.EM });
           }
         }
       )
     );
   } catch (error) {
     console.log("err control login: ", error);
+  }
+};
+
+const sendCode = async (req, res) => {
+  try {
+    let email = req.body.email;
+
+    // check email -> phải là local (kh nhận google, facebook)
+    let checkEmailLocal = await authService.checkEmailLocal(req.body.email);
+    
+    if (checkEmailLocal.EC !== 0) {
+      return res.status(401).json({
+        EM: checkEmailLocal.EM,
+        EC: checkEmailLocal.EC,
+        DT: "",
+      });
+    }
+
+    let code = await emailService.sendSimpleEmail(email); // gửi mail -> lấy code
+    let updateCode = await authService.updateCode(email, code); // khi nhận đc mail lập tức update code vào DB
+
+    return res.status(200).json({
+      EM: "ok",
+      EC: 0,
+      DT: { email: email },
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({
+      EM: "error from server",
+      EC: -1,
+      DT: "",
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    let email = req.body.email;
+    let code = req.body.code;
+    let password = req.body.password;
+
+    let user = await authService.updatePassword(email, password, code);
+    if (user.EC !== 0) {
+      return res.status(401).json({
+        EM: user.EM,
+        EC: user.EC,
+        DT: "",
+      });
+    }
+
+    return res.status(200).json({
+      EM: "ok",
+      EC: 0,
+      DT: "",
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({
+      EM: "error from server",
+      EC: -1,
+      DT: "",
+    });
   }
 };
 
@@ -302,5 +366,7 @@ module.exports = {
   check_ssoToken,
   getUserAccount,
   handleLoginWithGoogle,
-  handleLoginWithFacebook
+  handleLoginWithFacebook,
+  sendCode,
+  resetPassword,
 };
