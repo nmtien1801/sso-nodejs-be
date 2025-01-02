@@ -5,8 +5,13 @@ const configCORS = (app) => {
   // Add headers before the routes are defined
   app.use(function (req, res, next) {
     // console.log(">>>check bug don't status(FE): ", req.method);
-    // Website you wish to allow to connect
-    res.setHeader("Access-Control-Allow-Origin", process.env.REACT_URL);
+    // FE connect đến BE
+    const origin = req.headers.origin;
+    const allowedOrigins = process.env.REACT_URL.split(',');
+    if (allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
     // Request methods bạn muốn cho phép
     res.setHeader(
       "Access-Control-Allow-Methods",
