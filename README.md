@@ -1,9 +1,32 @@
-<h1 align="center">Hi 👋, I'm Nguyễn Minh Tiến</h1>
-<h3 align="center">SSO project BE</h3>
 
-<h3 align="left">Connect with me:</h3>
-<p align="left">
-</p>
+# SSO PROJECT BE 
 
-<h3 align="left">Languages and Tools:</h3>
-<p align="left"> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="javascript" width="40" height="40"/> </a> <a href="https://nodejs.org" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original-wordmark.svg" alt="nodejs" width="40" height="40"/> </a> <a href="https://reactjs.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original-wordmark.svg" alt="react" width="40" height="40"/> </a> </p>
+## Người thực hiện 
+- người thực hiện: Nguyễn Minh Tiến
+
+## Công nghệ sử dụng
+- FE: react 
+- BE: express, nodejs
+
+## link Github
+- [FE](https://github.com/nmtien1801/sso-react-fe.git)
+- [BE](https://github.com/nmtien1801/sso-nodejs-be.git)
+
+
+##  Mô tả
+- giúp người dùng đăng nhập bằng email, google, facebook. áp dụng statefull + stateless để đăng nhập nhằm tăng tính bảo mật. chức năng quên mật khẩu, đăng ký....
+
+- tại FE: http://localhost:3000 
+- chuyển đến BE để login: http://localhost:8080/login?serviceURL=http://localhost:3000
+- bấm login về lại FE: http://localhost:3000/code?ssoToken=123456
+- verify token 123456 lưu trong db, nếu đúng trả về FE jwt
+- FE sẽ decode jwt để thực hiện các chức năng khác ....
+
+
+## Screenshots
+*Hình 1: Màn hình Đăng nhập và Đăng ký với giao diện đơn giản, thân thiện.*
+
+![App Screenshot](https://res.cloudinary.com/dv6qgkaj4/image/upload/v1734138120/login-register_mgxmkz.png)
+
+
+
