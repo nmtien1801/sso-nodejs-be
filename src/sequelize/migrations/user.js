@@ -27,9 +27,6 @@ module.exports = {
       sex: {
         type: Sequelize.STRING,
       },
-      groupID: {
-        type: Sequelize.INTEGER,
-      },
       roleID: {
         type: Sequelize.STRING,
       },

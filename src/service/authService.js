@@ -66,8 +66,7 @@ const registerNewUser = async (rawUserData) => {
       passWord: CheckHashPass,
       address: formData.address,
       sex: formData.sex,
-      groupID: 2, // mặc định là Guest
-      roleID: "R2", // mặc định là bác sĩ
+      roleID: 2, // guess: 2 , admin: 1
     });
 
     // không bị lỗi

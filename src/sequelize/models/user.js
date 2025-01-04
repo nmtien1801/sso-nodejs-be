@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // sequelize defind relationship stackoverflow
-      // User.belongsTo(models.Group, { foreignKey: "groupID" });
+      // User.belongsTo(models.Group, { foreignKey: "roleId" });
       // User.belongsToMany(models.Project, { through: "Project_User" });
       // User.belongsTo(models.AllCodes, {
       //   foreignKey: "positionID",
@@ -46,7 +46,6 @@ module.exports = (sequelize, DataTypes) => {
       address: DataTypes.STRING,
       sex: DataTypes.STRING,
       phone: DataTypes.STRING,
-      groupID: DataTypes.INTEGER,
       image: DataTypes.STRING, // add column -> dùng string để hứng blob đã lưu trong db
       roleID: DataTypes.STRING,
       code: DataTypes.STRING,

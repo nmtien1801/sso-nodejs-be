@@ -1,6 +1,7 @@
 import express from "express";
 import configViewEngine from "./config/viewEngine";
 import initAuthRoutes from "./routes/authRoute";
+import initRoleRoutes from "./routes/roleRoute";
 import viewRoutes from "./routes/viewRoute";
 import configCORS from "./config/cors";
 import bodyParser from "body-parser"; // lấy params, query /user?id=7
@@ -41,8 +42,9 @@ app.use(flash()); // Sử dụng connect-flash để hiển thị message(EM)
 
 
 //-------------------------------------------------------------------------------------
-initAuthRoutes(app);
 viewRoutes(app);
+initAuthRoutes(app);
+initRoleRoutes(app);
 
 
 // đây là midleware(chạy từ trên xuống và xoay hoài nếu không có next)

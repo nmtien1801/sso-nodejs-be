@@ -14,7 +14,7 @@ const router = express.Router(); // bằng app = express();
 
 const initAuthRoutes = (app) => {
   // middleware
-  router.all("*", checkUserJwt, checkUserPermission);
+  // router.all("*", checkUserJwt, checkUserPermission);
 
   // custom passport  -> sau đó dùng authController.handleLogin ở (server.js)
   router.post("/api/login", (req, res, next) => {
