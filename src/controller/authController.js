@@ -114,6 +114,7 @@ const handleLogout = async (req, res) => {
 const check_ssoToken = async (req, res, next) => {
   try {
     const ssoToken = req.body.ssoToken;
+    console.log(">>>> user: ", req.user);
 
     // check ssoToken
     if (req.user && req.user.code && req.user.code === ssoToken) {
@@ -126,7 +127,7 @@ const check_ssoToken = async (req, res, next) => {
       let payload = {
         email: req.user.email,
         userName: req.user.userName,
-        // groupWithRole: req.user.groupWithRole,
+        pathOfRole: req.user.pathOfRole,
         roleID: req.user.roleID, // chức vụ
       };
       let token = createJwt(payload);
@@ -147,7 +148,7 @@ const check_ssoToken = async (req, res, next) => {
       let beforeSession = {
         email: req.user.email,
         userName: req.user.userName,
-        // groupWithRole: req.user.groupWithRole,
+        pathOfRole: req.user.pathOfRole,
         roleID: req.user.roleID, // chức vụ
         access_Token: token,
         refresh_Token: refreshToken,
@@ -189,19 +190,20 @@ const check_ssoToken = async (req, res, next) => {
 const getUserAccount = async (req, res) => {
   setTimeout(() => {
     try {
-      // req lấy từ context
+      // req lấy từ jwtAction.js
       return res.status(200).json({
         EM: "ok fetch context",
         EC: 0,
         DT: {
           access_Token: req.access_Token,
           refresh_Token: req.refresh_Token,
-          // groupWithRole: req.user.groupWithRole,
+          pathOfRole: req.user.pathOfRole,
           email: req.user.email,
           userName: req.user.userName,
         },
       });
     } catch (error) {
+      console.log("err get user account: ", error);
       return res.status(500).json({
         EM: "error from sever", //error message
         EC: 2, //error code

@@ -1,7 +1,6 @@
 import db from "../sequelize/models/index";
 import bcrypt from "bcryptjs";
 import { raw } from "body-parser";
-// import { getGroupWithRoles } from "./jwtService";
 import { Op } from "sequelize";
 import { createJwt } from "../middleware/jwtAction";
 import { reject, resolve } from "bluebird";
@@ -87,6 +86,23 @@ const checkPassword = (userPassWord, hashPassWord) => {
   return bcrypt.compareSync(userPassWord, hashPassWord); // true or false
 };
 
+// phân quyền: authenticate
+const getPathOfRole = async (user) => {
+  // scope: phạm vi
+  let path = await db.Role.findOne({
+    where: { id: user.roleID },
+    attributes: ["id", "name", "description"],
+    include: [
+      {
+        model: db.Path,
+        attributes: ["id", "url", "description"],
+        through: { attributes: [] },
+      },
+    ],
+  });
+  return path ? path : {};
+};
+
 const handleUserLogin = async (rawData) => {
   try {
     // search: sequelize Op.or
@@ -97,17 +113,16 @@ const handleUserLogin = async (rawData) => {
     });
     if (user) {
       let isCorrectPassword = checkPassword(rawData.password, user.passWord);
-      // console.log("user: ", user);
       // không bị lỗi
       if (isCorrectPassword === true) {
         const code = uuidv4();
+        let pathOfRole = await getPathOfRole(user);
 
-        // let groupWithRole = await getGroupWithRoles(user);
         return {
           EM: "ok!",
           EC: 0,
           DT: {
-            // groupWithRole: groupWithRole,
+            pathOfRole: pathOfRole,
             email: user.email,
             userName: user.userName,
             roleID: user.roleID, // chức vụ
@@ -134,7 +149,9 @@ const handleUserLogin = async (rawData) => {
 const updateUserRefreshToken = async (email, token) => {
   try {
     await db.User.update(
-      { refreshToken: token },
+      {
+        refreshToken: token,
+      },
       {
         where: {
           email: email,
@@ -147,7 +164,7 @@ const updateUserRefreshToken = async (email, token) => {
       DT: "",
     };
   } catch (error) {
-    console.log(">>>>check Err Login user: ", error);
+    console.log(">>>>check Err updateUserRefreshToken: ", error);
     return {
       EM: "something wrong in service ...",
       EC: -2,
@@ -172,11 +189,14 @@ const upsertUserSocialMedia = async (typeAccount, rawData) => {
         userName: rawData.userName,
         email: rawData.email,
         type: typeAccount,
+        roleID: 2, // guess: 2 , admin: 1
       });
       user = user.get({ plain: true }); // Chuyển đối tượng Sequelize thành JSON -> giống raw: true
     }
 
     const code = uuidv4();
+
+    let pathOfRole = await getPathOfRole(user);
 
     return {
       EM: "ok",
@@ -187,10 +207,11 @@ const upsertUserSocialMedia = async (typeAccount, rawData) => {
         googleId: rawData.googleId,
         type: typeAccount,
         code: code,
+        pathOfRole: pathOfRole,
       },
     };
   } catch (error) {
-    console.log(">>>>check Err Login user: ", error);
+    console.log(">>>>check Err upsertUserSocialMedia: ", error);
     return {
       EM: "something wrong in service ...",
       EC: -2,
@@ -210,13 +231,13 @@ const getUserByRefreshToken = async (refreshToken) => {
       return {
         email: user.email,
         userName: user.userName,
-        // groupWithRole: user.groupWithRole,
+        pathOfRole: user.pathOfRole,
         roleID: user.roleID, // chức vụ
       };
     }
     return null;
   } catch (error) {
-    console.log(">>>>check Err Login user: ", error);
+    console.log(">>>>check Err getUserByRefreshToken: ", error);
     return null;
   }
 };

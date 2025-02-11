@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       Role.belongsToMany(models.Path, {
         through: "Role_Path", // map qua groupRole
         foreignKey: "roleID", // khoá ngoại nếu không có sẽ tự sinh và lỗi
+        otherKey: "pathID",
       });
     }
   }

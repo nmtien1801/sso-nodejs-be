@@ -44,6 +44,7 @@ const nonSecurePaths = [
   "/forgot-password-page",
   "/api/send-code",
   "/api/reset-password",
+  "/api/account",
 ]; // kh check middleware url (1)
 
 // token từ BE sẽ lưu vào header bên FE
@@ -69,7 +70,7 @@ const checkUserJwt = async (req, res, next) => {
       cookies && cookies.access_Token ? cookies.access_Token : tokenFromHeader;
     let decoded = verifyToken(access_Token);
 
-    if (decoded && decoded !== "TokenExpiredError") {
+    if (decoded && decoded !== "TokenExpiredError") {      
       req.user = decoded; // gán thêm .user(data cookie) vào req BE nhận từ FE
       req.access_Token = access_Token; // gán thêm .token(data cookie) vào req BE nhận từ FE
       req.refresh_Token = cookies.refresh_Token; // gán thêm .token(data cookie) vào req BE nhận từ FE
@@ -131,31 +132,35 @@ const checkUserPermission = (req, res, next) => {
   if (nonSecurePaths.includes(req.path) || req.path === "/api/account")
     return next(); // kh check middleware url (2)
   if (req.user) {
-    let email = req.user.email; // (chắc chắn hơn)-> dùng query xuống db để xem quyền -> ss roles lấy từ token
-    // let roles = req.user.groupWithRole.Roles;
-    let currentUrl = req.path;
-    // if (!roles && roles.length === 0) {
-    //   return res.status(401).json({
-    //     EC: -1,
-    //     DT: "",
-    //     EM: `you don't permission to access this resource`,
-    //   });
-    // }
+    
+    let email = req.user.email; // (chắc chắn hơn)-> dùng query xuống db để xem quyền -> ss paths lấy từ token
+    let paths = req.user.pathOfRole.Paths;
+
+    let currentUrl = req.originalUrl;
+
+    if (!paths && paths.length === 0) {
+      return res.status(401).json({
+        EC: -1,
+        DT: "",
+        EM: `you don't permission to access this resource`,
+      });
+    }
+    
     // vòng lặp some từng phần tử ss token vs path(router)
     // bug role/:id từ req là động -> thêm include  /:id
-    // let canAccess = roles.some(
-    //   (item) => item.url === currentUrl || currentUrl.includes(item.url)
-    // );
-    // if (canAccess) {
-    // next();
-    // } else {
-    //   console.log(">>>>check canAccess: ", canAccess);
-    //   return res.status(401).json({
-    //     EC: -1,
-    //     DT: "",
-    //     EM: `you don't permission to access this resource`,
-    //   });
-    // }
+    let canAccess = paths.some(
+      (item) => item.url === currentUrl || currentUrl.includes(item.url)
+    );
+    if (canAccess) {
+      next();
+    } else {
+      console.log(">>>>check canAccess: ", canAccess);
+      return res.status(401).json({
+        EC: -1,
+        DT: "",
+        EM: `you don't permission to access this resource`,
+      });
+    }
   } else {
     return res.status(401).json({
       EC: -1,
@@ -177,7 +182,7 @@ const handleRefreshToken = async (refreshToken) => {
     let payload = {
       email: user.email,
       userName: user.userName,
-      // groupWithRole: user.groupWithRole,
+      pathOfRole: user.pathOfRole,
       roleID: user.roleID, // chức vụ
     };
     newAccessToken = createJwt(payload);

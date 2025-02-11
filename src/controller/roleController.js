@@ -57,7 +57,7 @@ const create = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    let data = await roleApiService.deletePath(req.body.id);
+    let data = await roleApiService.deletePath(req.params.pathId);
     return res.status(200).json({
       EM: data.EM,
       EC: data.EC,

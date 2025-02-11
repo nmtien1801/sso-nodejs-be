@@ -8,11 +8,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      pathID: {
-        type: Sequelize.INTEGER,
-      },
+      
       roleID: {
         type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      pathID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
 
       createdAt: {
@@ -26,7 +29,7 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("GroupRole");
+    await queryInterface.dropTable("Role_Path");
   },
 };
 

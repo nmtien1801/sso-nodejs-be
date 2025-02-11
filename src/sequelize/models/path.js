@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Path.belongsToMany(models.Role, {
         through: "Role_Path", // map tới group_role
-        foreignKey: "roleID", // khoá ngoại
+        foreignKey: "pathID", // khoá ngoại
+        otherKey: "roleID",
       });
     }
   }

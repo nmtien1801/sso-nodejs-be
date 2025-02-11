@@ -1,7 +1,6 @@
 import express from "express";
 import roleController from "../controller/roleController";
-// import { checkUserJwt, checkUserPermission } from "../middleware/jwtAction";
-
+import { checkUserJwt, checkUserPermission } from "../middleware/jwtAction";
 
 const router = express.Router(); // bằng app = express();
 /**
@@ -12,12 +11,12 @@ const router = express.Router(); // bằng app = express();
 
 const initRoleRoutes = (app) => {
   // middleware
-  // router.all("*", checkUserJwt, checkUserPermission);
+  router.all("*", checkUserJwt, checkUserPermission);
 
   // roles router
   router.get("/path/read", roleController.read);
   router.post("/path/create", roleController.create);
-  router.delete("/path/delete", roleController.remove);
+  router.delete("/path/delete/:pathId", roleController.remove);
   router.get("/path/by-role/:roleId", roleController.getPathByRoleId); // param thì không đọc được '?'
   router.post("/path/authenticateRole", roleController.authenticateRole);
 

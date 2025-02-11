@@ -13,8 +13,8 @@ const createNewPath = async (path) => {
       ({ url: url1 }) => !currentPath.some(({ url: url2 }) => url1 === url2)
     );
 
-    console.log(">>>>check currentPath: ", currentPath);
-    console.log(">>>>check dif: ", persist);
+    // console.log(">>>>check currentPath: ", currentPath);
+    // console.log(">>>>check dif: ", persist);
     if (persist.length === 0) {
       return {
         EM: "notthing to create path...", //error message
@@ -22,7 +22,7 @@ const createNewPath = async (path) => {
         DT: [], // data
       };
     }
-    await db.Role.bulkCreate(persist);
+    await db.Path.bulkCreate(persist);
     return {
       EM: `create path success: ${persist.length} path`, //error message
       EC: 0, //error code
@@ -90,8 +90,6 @@ const deletePath = async (id) => {
 
 const getPathByRoleId = async (id) => {
   try {
-    // Group - Role(N-1)
-
     let path = await db.Role.findOne({
       where: { id: id },
       include: [
@@ -128,8 +126,9 @@ const getPathByRoleId = async (id) => {
 const authenticateRole = async (data) => {
   try {
     await db.Role_Path.destroy({
-      where: { typeID: +data.typeId},
+      where: { roleID: +data.roleID},
     });
+
     await db.Role_Path.bulkCreate(data.role_path);
 
     return {
